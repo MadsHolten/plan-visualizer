@@ -1,0 +1,9 @@
+:host ::ng-deep .rooms {
+    stroke: #000;
+    fill :#eee;
+    stroke-width: 0.5px;
+}
+:host ::ng-deep .room:hover {
+    cursor: pointer;
+    fill: #ddd;
+}
