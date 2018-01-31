@@ -12,37 +12,14 @@ import * as _ from 'lodash';
 })
 export class AppComponent implements OnInit {
 
+  private levels;   // Levels in dataset
+  private selectedLevel;
+  private query: string;
+  private data;     // geoJSON to be sent to plan component
+
   constructor(
     private _qs: QueryService
   ) {}
-
-  data = {
-    type: "FeatureCollection",
-    features: [
-      {
-        type: "Feature", 
-        id:"0",
-        geometry: {
-          type: "Polygon",
-          coordinates: [[[0.2085,-17.5915],[6.262,-17.5915],[6.262,-13.8],[6.2,-13.8],[6.2,-12.6],[6.0882304,-12.6],[0.2085,-12.6],[0.2085,-17.5915]]]
-        },
-        properties: {
-          name: "room 1"
-        }
-      },
-      {
-        type: "Feature",
-        id:"1",
-        geometry: {
-          type:"Polygon",
-          coordinates:[[[0.2085,-10.294],[0.2085,-12.6],[6.226,-12.6],[6.226,-10.995],[6.288,-10.995],[6.288,-10.308],[4.694,-10.308],[4.694,-10.294],[0.2085,-10.294]]]
-        },
-        properties: {
-          name: "room 2"
-        }
-      }
-    ]
-  }
 
   triples = `
 @prefix bot:      <https://w3id.org/bot#> .
@@ -216,34 +193,79 @@ export class AppComponent implements OnInit {
 <https://forge-sparql.herokuapp.com/projects/P000001/Rooms/40c2d70d-8d3b-49a9-9702-6756a4ed76b3-00033781> prop:spaceBoundary "POLYGON((0.2085 -5.975, 0.2085 -10.0, 1.4314 -10.0, 1.4314 -5.975, 0.2085 -5.975))"^^geo:wktLiteral .
 <https://forge-sparql.herokuapp.com/projects/P000001/Rooms/335fc1b3-63ca-474d-9c21-6d5abbdb0485-00033925> prop:spaceBoundary "POLYGON((8.5915 -0.2085, 0.2085 -0.2085, 0.2085 -17.5915, 8.5915 -17.5915, 8.5915 -0.2085))"^^geo:wktLiteral .
 `
-
-  query = `
-PREFIX bot:      <https://w3id.org/bot#>
-PREFIX rdfs:     <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX prop:     <https://w3id.org/prop#>
-PREFIX geo:      <http://www.opengis.net/ont/geosparql#>
-SELECT DISTINCT ?uri ?name ?geometry2d
-WHERE {
-  ?st a bot:Storey ;
-    rdfs:label ?storey ;
-    bot:hasSpace ?uri .
-  ?uri a bot:Space ;
-    rdfs:label ?name ;
-    prop:spaceBoundary ?geometry2d .
-    FILTER(?storey = "Level 1")
-}
-  `
-
   ngOnInit(){
-    this._qs.doQuery(this.query, this.triples)
-      .then(res => {
-        if(res){
-          this.data = this.resToGeoJSON(res);
-        }
-      }, err => console.log(err));
+    this.getLevels().then(levels => {
+      // Choose first item as the selected level
+      this.selectedLevel = levels[0].uri;
+
+      this.query = this._getGeometryQuery(this.selectedLevel);
+      
+      // Query for the plan geometry
+      return this._qs.doQuery(this.query, this.triples);
+    })
+    .then(res => {
+      if(res){
+        this.data = this._resToGeoJSON(res);
+      }
+    })
+    .catch(err => console.log(err));
   }
 
-  resToGeoJSON(res){
+  getLevels(): Promise<any>{
+    var q = `
+        PREFIX bot:      <https://w3id.org/bot#>
+        PREFIX rdfs:     <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT DISTINCT ?uri ?label
+        WHERE {
+          ?uri a bot:Storey ;
+            rdfs:label ?label .
+        }`;
+    return this._qs.doQuery(q, this.triples)
+          .then(res => {
+            if(res){
+              var levels = _.map(res.results.bindings, obj => {
+                return _.mapValues(obj, x => x.value);
+              });
+              this.levels = levels;
+
+              // Return levels
+              return this.levels;
+            }
+          });
+  }
+
+  onLevelChange(uri){
+    this.selectedLevel = uri;
+
+    // Update query
+    this.query = this._getGeometryQuery(this.selectedLevel);
+
+    // Update plan geometry
+    this._qs.doQuery(this.query, this.triples)
+          .then(res => {
+            if(res){
+              this.data = this._resToGeoJSON(res);
+            }
+          })
+          .catch(err => console.log(err));
+  }
+
+  private _getGeometryQuery(levelURI){
+    return `
+PREFIX bot:      <https://w3id.org/bot#>\n
+PREFIX rdfs:     <http://www.w3.org/2000/01/rdf-schema#>\n
+PREFIX prop:     <https://w3id.org/prop#>\n
+PREFIX geo:      <http://www.opengis.net/ont/geosparql#>\n\n
+SELECT DISTINCT ?uri ?name ?geometry2d\n
+WHERE {\n
+\t<${levelURI}> bot:hasSpace ?uri .\n
+\t?uri a bot:Space ;\n
+\t\trdfs:label ?name ;\n
+\t\tprop:spaceBoundary ?geometry2d .\n
+}`;
+  }
+
+  private _resToGeoJSON(res){
     var data = res.results.bindings;
     var geoJSON = {type: "FeatureCollection", features: []};
 

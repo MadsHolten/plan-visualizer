@@ -25,15 +25,20 @@ export class PlanComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
-    this.createPlan();
+    if(this.data){
+      this.createPlan();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.data.currentValue) {
       this.data = changes.data.currentValue;
-      console.log(this.data);
-      this.cleanPlan();
-      this.attachData();
+      if(this.svg){
+        this.cleanPlan();
+        this.attachData();
+      }else{
+        this.createPlan();
+      }
     }
   }
 

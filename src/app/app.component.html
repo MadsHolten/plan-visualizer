@@ -1,2 +1,13 @@
 <!--The content below is only a placeholder and can be replaced.-->
 <plan-drawing height="600" [data]="data"></plan-drawing>
+
+<div class="controls">
+    <mat-form-field>
+        <mat-select placeholder="Select level" (change)="onLevelChange($event.value)" [(value)]="selectedLevel">
+            <mat-option *ngFor="let level of levels" [value]="level.uri">
+            {{ level.label }}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
+<code>{{query}}</code>
