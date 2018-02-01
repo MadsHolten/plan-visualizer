@@ -12,10 +12,10 @@ import * as _ from 'lodash';
 })
 export class AppComponent implements OnInit {
 
-  private levels;   // Levels in dataset
-  private selectedLevel;
-  private query: string;
-  private data;     // geoJSON to be sent to plan component
+  public levels;   // Levels in dataset
+  public selectedLevel;
+  public query: string;
+  public data;     // geoJSON to be sent to plan component
 
   constructor(
     private _qs: QueryService
@@ -250,7 +250,7 @@ export class AppComponent implements OnInit {
           .catch(err => console.log(err));
   }
 
-  private _getGeometryQuery(levelURI){
+  private _getGeometryQuery(levelURI): string{
     return `
 PREFIX bot:      <https://w3id.org/bot#>\n
 PREFIX rdfs:     <http://www.w3.org/2000/01/rdf-schema#>\n
@@ -278,6 +278,7 @@ WHERE {\n
       var obj = {type: "Feature", id: uri, geometry: geometry2d, properties: properties};
       geoJSON.features.push(obj);
     });
+    //console.log(JSON.stringify(geoJSON));
 
     return geoJSON;
   }
