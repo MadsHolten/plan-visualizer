@@ -15,6 +15,7 @@ export class AppComponent implements OnInit {
   public levels;   // Levels in dataset
   public selectedLevel;
   public query: string;
+  public showQuery: boolean = false;
   public data;     // geoJSON to be sent to plan component
 
   constructor(
@@ -245,6 +246,7 @@ export class AppComponent implements OnInit {
           .then(res => {
             if(res){
               this.data = this._resToGeoJSON(res);
+              this.showQuery = true;
             }
           })
           .catch(err => console.log(err));

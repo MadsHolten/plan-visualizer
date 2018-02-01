@@ -10,4 +10,9 @@
         </mat-select>
     </mat-form-field>
 </div>
-<code>{{query}}</code>
+<mat-card class="query-container" *ngIf="showQuery">
+    <div class="icon-bar">
+        <mat-icon (click)="showQuery = !showQuery">close</mat-icon>
+    </div>
+    <span class="query" [innerHTML]="query | MarkdownToHtml"></span>
+</mat-card>

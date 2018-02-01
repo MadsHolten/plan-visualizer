@@ -90,7 +90,7 @@ export class PlanComponent implements OnInit {
     var canvasCentroid = [this.width/2, this.height/2];
     var offsetX = canvasCentroid[0]-scale*(bb[0]+dataCentroid[0]);
     var offsetY = canvasCentroid[1]-scale*(bb[1]+dataCentroid[1]);
-    console.log(scale,offsetX,offsetY);
+
     return [scale,offsetX,offsetY]
   }
 

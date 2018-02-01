@@ -4,7 +4,12 @@ import { NgModule } from '@angular/core';
 // Angular material
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSelectModule,
-         MatInputModule } from '@angular/material';
+         MatInputModule,
+         MatCardModule,
+         MatIconModule } from '@angular/material';
+
+// Pipes
+import { MarkdownToHtmlModule } from 'markdown-to-html-pipe';
 
 
 import { AppComponent } from './app.component';
@@ -20,7 +25,10 @@ import { PlanComponent } from './plan/plan.component';
     BrowserModule,
     BrowserAnimationsModule,
     MatSelectModule,
-    MatInputModule
+    MatInputModule,
+    MatCardModule,
+    MatIconModule,
+    MarkdownToHtmlModule
   ],
   providers: [],
   bootstrap: [AppComponent]
