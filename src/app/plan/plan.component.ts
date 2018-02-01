@@ -2,9 +2,7 @@ import { Component, OnInit, OnChanges, SimpleChanges, ViewChild, ElementRef, Inp
 
 import * as geojsonExtent from 'geojson-extent';
 import * as _ from 'lodash';
-
-//Tell TS D3 exists as a variable/object somewhere globally
-declare const d3: any;
+import * as d3 from 'd3';
 
 //////
 // For tooltips, maybe have a look at this: https://github.com/andyperlitch/ngx-d3-tooltip
