@@ -43,9 +43,10 @@ export class NgPlanComponent implements AfterViewInit {
     // Move geometry
     private clickX: number;
     private clickY: number;
-    private transform = 'translate(0,0)';
+    private transform = 'translate(0,0) scale(1,1)';
     private movedX: number = 0; // store move state
     private movedY: number = 0; // store move state
+    private scaled: number = 1 // store scale state
 
     @ViewChild('canvas') private planContainer: ElementRef;
 
@@ -111,7 +112,9 @@ export class NgPlanComponent implements AfterViewInit {
     setTransform(x,y){
         x = this.movedX + x;
         y = this.movedY + y;
-        this.transform = `translate(${x},${y})`;
+        var oldTrns = this.transform.match(/\([^\)]+\)/g)[0];
+        var newTrns = `(${x},${y})`;
+        this.transform = this.transform.replace(oldTrns, newTrns);
     }
 
     zoomExtends(){
@@ -128,6 +131,20 @@ export class NgPlanComponent implements AfterViewInit {
         this.extractRooms();
     }
 
+    zoomOut(){
+        this.scaled = this.scaled-0.1;
+        var oldScale = this.transform.match(/\([^\)]+\)/g)[1];
+        var newScale = `(${this.scaled},${this.scaled})`;
+        this.transform = this.transform.replace(oldScale, newScale);
+    }
+
+    zoomIn(){
+        this.scaled = this.scaled+0.1;
+        var oldScale = this.transform.match(/\([^\)]+\)/g)[1];
+        var newScale = `(${this.scaled},${this.scaled})`;
+        this.transform = this.transform.replace(oldScale, newScale);
+    }
+
     /**
      * MOUSE EVENTS
      */
@@ -141,6 +158,13 @@ export class NgPlanComponent implements AfterViewInit {
         if(ev.key == "Esc"){
             this.dragMode = false;
         }
+        if(ev.key == "ArrowDown"){
+            this.zoomOut();
+        }
+        if(ev.key == "ArrowUp"){
+            this.zoomIn();
+        }
+        
     }
     @HostListener('document:keyup', ['$event'])
     onKeyUp(ev:KeyboardEvent) {
