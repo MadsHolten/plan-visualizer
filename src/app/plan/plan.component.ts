@@ -1,143 +1,170 @@
-import { Component, OnInit, OnChanges, SimpleChanges, ViewChild, ElementRef, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, AfterViewInit, OnChanges, SimpleChanges, ViewChild, ElementRef, HostListener } from '@angular/core';
 
 import * as geojsonExtent from 'geojson-extent';
-import * as _ from 'lodash';
-import * as d3 from 'd3';
+import * as d3 from 'd3-decompose';  // takes SVG or CSS3 transform strings and converts them into usable values
 
-//////
-// For tooltips, maybe have a look at this: https://github.com/andyperlitch/ngx-d3-tooltip
-//////
+export interface Room {
+    name: string;
+    polygons: string[];
+}
 
 @Component({
-  selector: 'plan-drawing',
-  templateUrl: './plan.component.html',
-  styleUrls: ['./plan.component.css']
+    selector: 'ng-plan',
+    templateUrl: './plan.component.html',
+    styleUrls: ['./plan.component.css']
 })
-export class PlanComponent implements OnInit {
+export class PlanComponent implements AfterViewInit {
 
- private svg;
- private offsetX: number;
- private offsetY: number;
- private width: number;
- @Input() private height: number;
- @Input() private data;
+    @Output() clickedRoom = new EventEmitter();
 
- @ViewChild('plan') private planContainer: ElementRef;
- @ViewChild('tooltip') private tooltipContainer: ElementRef;
+    @Input() private data;  //geoJSON
+    public rooms;
 
-  constructor() { }
+    private selectedRoom;
 
-  ngOnInit() {
-    if(this.data){
-      // this.data = this.reflectX(this.data);
-      this.reflectY(this.data);
-      this.createPlan();
+    // Canvas
+    private canvasWidth;
+    private canvasHeight;
+
+    // Scale / offset
+    // These factors are calculated from geometry extends
+    private baseScale = 1;
+    private baseOffsetX = 0;
+    private baseOffsetY = 0;
+
+    // geometry
+    public panMode: boolean = false;
+    private transform = 'translate(0,0) scale(1,1)';
+    private movedX: number = 0; // store move state
+    private movedY: number = 0; // store move state
+    private scaled: number = 1 // store scale state
+
+    @ViewChild('canvas') private planContainer: ElementRef;
+
+    constructor() { }
+
+    ngAfterViewInit(){
+        this.getCanvasSize();
     }
-  }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes.data.currentValue) {
-      this.data = changes.data.currentValue;
-      this.data = this.reflectY(this.data);
-      // this.data = this.reflectX(changes.data.currentValue);
-      if(this.svg){
-        this.cleanPlan();
-        this.attachData();
-      }else{
-        this.createPlan();
-      }
-    }
-  }
-
-  reflectY(data){
-    // Reflects the X coordinate of the geoJSON object to mirror the plan horizontally
-    // The reason is that SVG uses a coordinate system where origo is in the upper left corner
-    for(var i in data.features){
-      var feature = data.features[i];
-      for(var j in feature){
-        var polygons = feature[j].coordinates;
-        for(var k in polygons){
-          var coordinates = polygons[k];
-          for(var l in coordinates){
-            var coordinate = coordinates[l];
-            var x = coordinate[0];
-            var y = coordinate[1];
-            // Reverse X coordinate
-            data.features[i].geometry.coordinates[k][l][0] = x;
-            data.features[i].geometry.coordinates[k][l][1] = -y;
-          }
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.data.currentValue) {
+            this.data = changes.data.currentValue;
+            this.getScaleOffset();
+            this.extractRooms();
         }
-      }
     }
-    return data;
-  }
 
-  getScaleOffset(width,height) {
-    // Get bounding box [xMin, yMin, xMax, yMax]
-    var bb = geojsonExtent(this.data);
+    getCanvasSize(){
+        const element = this.planContainer.nativeElement;
+        const size = element.getBoundingClientRect();
+        this.canvasWidth = size.width;
+        this.canvasHeight = size.height;
+    }
 
-    // Calculate data size
-    var dataWidth = bb[2]-bb[0];
-    var dataHeight = bb[3]-bb[1];
-    var dataCentroid = [dataWidth/2, dataHeight/2];
+    extractRooms(){
+        this.rooms = this.data.features.map(room => {
+            var polygons = [];
 
-    // Calculate scale factors
-    var scaleWidth = Math.max(dataWidth, width)/Math.min(dataWidth, width);
-    var scaleHeight = Math.max(dataHeight, height)/Math.min(dataHeight, height);
-    var scale = Math.min(scaleHeight,scaleWidth);
+            if(room.geometry.type == "Polygon"){
+                room.geometry.coordinates.forEach(polygon => {
+                    var points = '';
+                    polygon.forEach(coordinate => {
+                        var x = coordinate[0];
+                        var y = -coordinate[1]; // reflect since SVG uses reflected coordinate system
 
-    // Calculate offset factors
-    var canvasCentroid = [this.width/2, this.height/2];
-    var offsetX = canvasCentroid[0]-scale*(bb[0]+dataCentroid[0]);
-    var offsetY = canvasCentroid[1]-scale*(bb[1]+dataCentroid[1]);
+                        // Offset to fit
+                        x = x+this.baseOffsetX;
+                        y = y+this.baseOffsetY;
 
-    return [scale,offsetX,offsetY]
-  }
+                        // Scale
+                        x = x*this.baseScale;
+                        y = y*this.baseScale;
 
-  createPlan() {
-    const element = this.planContainer.nativeElement;
-    var margins = 20;
-    this.width = element.clientWidth-margins;
-    if(!this.height) this.height = 600;
+                        points+= `${x},${y} `;
+                    })
+                    points = points.trim();    // remove last space
+                    polygons.push(points);
+                });
+            }
+            var name = room.properties.name;
+            var uri = room.properties.uri;
+            return {name: name, uri: uri, polygons: polygons}
+        });
 
-    this.svg = d3.select(element).append('svg')
-                  .attr('width', this.width)
-                  .attr('height', this.height);
+    }
+
+    getScaleOffset() {
+        // Get bounding box [xMin, yMin, xMax, yMax]
+        var bb = geojsonExtent(this.data);
     
-    this.attachData();
-  }
+        // Calculate data size
+        var dataWidth = bb[2]-bb[0];
+        var dataHeight = bb[3]-bb[1];
 
-  attachData(){
-    // Get scale and offset factors for scaling and zooming to div extends
-    var scaleOffset = this.getScaleOffset(this.width,this.height);
+        // Calculate scale factors
+        var scaleWidth = this.canvasWidth/dataWidth;
+        var scaleHeight = this.canvasHeight/dataHeight;
+        var scale = Math.min(scaleHeight,scaleWidth);
 
-    // Scale function
-    function scale (scaleFactor,offsetX,offsetY) {
-      return d3.geoTransform({
-        point: function(x, y) {
-          this.stream.point( (x*scaleFactor+offsetX) , y*scaleFactor+offsetY);
-        }
-      });
+        var scaledDataCentroid = [scale*(bb[0]+dataWidth/2), scale*(bb[1]+dataHeight/2)];
+        var canvasCentroid = [this.canvasWidth/2, this.canvasHeight/2];
+    
+        // Calculate offset factors
+        var offsetX = canvasCentroid[0]-scaledDataCentroid[0];
+        var offsetY = canvasCentroid[1]-scaledDataCentroid[1];
+
+        // Set global variables
+        this.baseOffsetX = offsetX;
+        this.baseOffsetY = offsetY;
+        this.baseScale = scale;
+    
+        return [scale,offsetX,offsetY]
     }
 
-    // Path generator
-    var path = d3.geoPath(null)
-        .projection(scale(scaleOffset[0],scaleOffset[1],scaleOffset[2]));
+    move(displacement){
+        var x = displacement[0];
+        var y = displacement[1];
 
-    this.svg.append("g")
-          .attr('class', 'rooms')
-        .selectAll('path')
-          .data(this.data.features)
-        .enter().append('path')
-          .attr('d', path)
-          .attr('id', d => d.id)
-          .attr('name', d => d.properties.name)
-          .attr('class', 'room');
-  }
+        if(!isNaN(x) && !isNaN(y)){
+            x = this.movedX + x;
+            y = this.movedY + y;
 
-  cleanPlan(){
-    // Remove everything below the SVG element
-    d3.selectAll("svg > *").remove();
-  }
+            var oldTrns = d3.decompose(this.transform).translate;
+            var newTrns = `translate(${x},${y})`;
+            this.transform = this.transform.replace(oldTrns, newTrns);
+        }
+    }
+
+    moveEnd(displacement){
+        // Update moved coordinates
+        this.movedX = this.movedX+displacement[0];
+        this.movedY = this.movedY+displacement[1];
+    }
+
+    zoom(scale){
+        var oldScale = d3.decompose(this.transform).scale;
+        var newScale = `scale(${scale},${scale})`;
+        this.transform = this.transform.replace(oldScale, newScale);
+    }
+
+    zoomOut(){
+        this.scaled = this.scaled-0.1;
+        var oldScale = d3.decompose(this.transform).scale;
+        var newScale = `scale(${this.scaled},${this.scaled})`;
+        this.transform = this.transform.replace(oldScale, newScale);
+    }
+
+    zoomIn(){
+        this.scaled = this.scaled+0.1;
+        var oldScale = this.transform.match(/\([^\)]+\)/g)[1];
+        var newScale = `(${this.scaled},${this.scaled})`;
+        this.transform = this.transform.replace(oldScale, newScale);
+    }
+
+    selectRoom(ev){
+        this.clickedRoom.emit(ev);
+        this.selectedRoom = ev;
+    }
 
 }

@@ -1,0 +1,9 @@
+<div class="container">
+    <h4 mat-dialog-title>{{title}}</h4>
+    <div *ngIf="sensorIdent">
+        <line-chart-demo></line-chart-demo>
+    </div>
+    <div *ngIf="!sensorIdent">
+        No temperature sensor in this room
+    </div>
+</div>

@@ -1,6 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material';
+import { MatSnackBar } from '@angular/material';
+
 import { QueryService } from './query.service';
 import { RoomsService } from './services/rooms.service';
+import { ChartDialogComponent } from './dialogs/chart-dialog.component';
 
 import * as parse from 'wellknown';
 import * as _ from 'lodash';
@@ -21,7 +25,9 @@ export class AppComponent implements OnInit {
 
   constructor(
     private _qs: QueryService,
-    private _rs: RoomsService
+    private _rs: RoomsService,
+    private _dialog: MatDialog,
+    public snackBar: MatSnackBar
   ) {}
 
   ngOnInit(){
@@ -30,12 +36,16 @@ export class AppComponent implements OnInit {
 
   getLevels(){
 
-    this._rs.getStoreys()
+    this._rs.getStoreysWithSpaces()
         .subscribe(x => {
-          this.levels = x;
-          
-          // Show first level by default
-          this.onLevelChange(x[0].uri);
+          if(x.length > 0){
+            this.levels = x;
+            
+            // Show first level by default
+            this.onLevelChange(x[0].uri);
+          }else{
+            this.showSnackBar('Could not find any spaces with a 2D space boundary defined');
+          }
         }, err => console.log(err));
 
   }
@@ -52,8 +62,28 @@ export class AppComponent implements OnInit {
               this.data = this._resToGeoJSON(res);
 
               // this.showQuery = true;
+            }else{
+              this.showSnackBar('Could not load 2D space boundaries from the chosen level');
             }
           }, err => console.log(err));
+  }
+
+  showSpaceDialog(space){
+    let dialogRef = this._dialog.open(ChartDialogComponent, {
+      height: '600px',
+      width: '800px',
+      data: {
+        title: `${space.name} measurements`,
+        uri: space.uri,
+        description: "This is just a test.",
+        inputText: "URI"}
+    });
+  }
+
+  showSnackBar(message: string) {
+    this.snackBar.open(message, undefined {
+      duration: 2000,
+    });
   }
 
   private _resToGeoJSON(res){
@@ -65,7 +95,7 @@ export class AppComponent implements OnInit {
       var name: string = d.name.value;
       var geometry2d: string = parse(d.geometry2d.value);
 
-      var properties = {name: name};
+      var properties = {name: name, uri: uri};
       var obj = {type: "Feature", id: uri, geometry: geometry2d, properties: properties};
       geoJSON.features.push(obj);
     });

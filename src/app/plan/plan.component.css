@@ -1,9 +1,11 @@
-:host ::ng-deep .rooms {
-    stroke: #000;
-    fill :#eee;
-    stroke-width: 0.5px;
+.polygon {
+    fill:#eee;
+    stroke:#777;
+    stroke-width:1
 }
-:host ::ng-deep .room:hover {
-    cursor: pointer;
-    fill: #ddd;
+.room:hover {
+    opacity: 0.5;
+}
+.selected {
+    fill:red;
 }

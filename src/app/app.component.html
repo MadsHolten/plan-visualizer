@@ -1,10 +1,10 @@
 <!--The content below is only a placeholder and can be replaced.-->
 <!-- <plan-drawing height="600" [data]="data"></plan-drawing> -->
-<ng-plan height="600" [data]="data"></ng-plan>
+<ng-plan height="600" [data]="data" (clickedRoom)="showSpaceDialog($event)"></ng-plan>
 
 <div class="controls">
     <app-settings></app-settings>
-    <mat-form-field>
+    <mat-form-field *ngIf="levels">
         <mat-select placeholder="Select level" (change)="onLevelChange($event.value)" [(value)]="selectedLevel">
             <mat-option *ngFor="let level of levels" [value]="level.uri">
             {{ level.name }}
