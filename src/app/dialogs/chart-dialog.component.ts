@@ -17,6 +17,13 @@ export class ChartDialogComponent implements OnInit {
     description: string;
     inputText: string;
 
+    // Plot data
+    plotData: Array<any> = [];
+    plotLabels: Array<any> = [];
+
+    chartTypes = ['line','bar'];
+    chartType = 'line';
+
     sensorIdent: string;
 
     constructor(
@@ -29,11 +36,20 @@ export class ChartDialogComponent implements OnInit {
         this.description = this.data.description ? this.data.description : null;
         this.inputText = this.data.inputText ? this.data.inputText : "Input";
 
-        this._rs.getTemperatureSensorIdent(this.data.uri)
+        this._rs.getTemperatureObservations(this.data.uri)
             .subscribe(res => {
-                this.sensorIdent = res[0];
-                console.log(res);
+                if(res.length > 0){
+                    this.sensorIdent = 'hep';
+                    var data = res.map(x => Number(x.value));
+                    var labels = res.map(x => x.time);
+                    this.plotData.push({data: data, label: "Temperature"});
+                    this.plotLabels = labels;
+                }
             });
+    }
+
+    changeChartType(){
+        console.log(this.chartType);
     }
 
     // Close when clicking outside

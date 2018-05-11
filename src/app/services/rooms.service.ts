@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 
 import { TriplestoreService } from './triplestore.service';
 
+import * as moment from 'moment';
+
 export interface Level {
     uri: string;
     name: string;
@@ -74,21 +76,59 @@ export class RoomsService  extends TriplestoreService {
         PREFIX dog: 	<http://elite.polito.it/ontologies/dogont.owl#>
         PREFIX skos: 	<http://www.w3.org/2004/02/skos/core#>
          
-        SELECT ?SensorIdent
+        SELECT ?sensorId
         WHERE{
-          BIND(<${spaceURI}> AS ?space)
-          ?space ^skos:related ?room .
-          ?room bot:containsElement ?TempSensor .
-          ?TempSensor rdf:type dog:TemperatureSensor .
-          ?TempSensor seas:connectsAt/dcterms:identifier ?SensorIdent .
+          BIND(<${spaceURI}> AS ?archSpace)
+          ?space skos:related ?archSpace ;
+            bot:containsElement ?tempSensor .
+          ?tempSensor a dog:TemperatureSensor ;
+            seas:connectsAt/dcterms:identifier ?sensorId .
         }`;
-
-        console.log(q);
 
         return this.getQuery(q)
                 .map(res => {
                     let x: any = res;
-                    return x.results.bindings.map(obj => obj.SensorIdent.value);
+                    return x.results.bindings.map(obj => obj.sensorId.value);
+                });
+
+    }
+
+    public getTemperatureObservations(spaceURI){
+
+        const q = `
+        PREFIX bot: 	<https://w3id.org/bot#>
+        PREFIX seas: 	<https://w3id.org/seas/>
+        PREFIX dcterms: <http://purl.org/dc/terms/>
+        PREFIX dog: 	<http://elite.polito.it/ontologies/dogont.owl#>
+        PREFIX skos: 	<http://www.w3.org/2004/02/skos/core#>
+        PREFIX sosa:	<http://www.w3.org/ns/sosa/>
+        PREFIX qudt:	<http://qudt.org/1.1/schema/qudt#>
+         
+        SELECT ?time ?value
+        WHERE{
+          BIND(<${spaceURI}> AS ?archSpace)
+
+          # Get sensor
+          ?space skos:related ?archSpace ;
+            bot:containsElement ?tempSensor .
+          ?tempSensor a dog:TemperatureSensor .
+
+          # Observation
+          ?obs sosa:madeBySensor | sosa:actuationMadeBy ?tempSensor ;
+            sosa:hasResult/qudt:numericValue ?value ;
+            sosa:resultTime ?time .
+        }
+        ORDER BY ?time
+        LIMIT 100`;
+
+        return this.getQuery(q)
+                .map(res => {
+                    let x: any = res;
+                    return x.results.bindings.map(obj => {
+                        var time = moment(obj.time.value).format('LLLL');
+                        var value = obj.value.value;
+                        return {time: time, value: value}
+                    });
                 });
 
     }

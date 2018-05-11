@@ -1,8 +1,7 @@
 <svg canvasEvents 
-    width="100%"
-    height="500px"
-    [style.cursor]="panMode ? 'move' : 'pointer'"
+    [style.cursor]="panMode ? 'move' : 'default'"
     #canvas
+    class=canvas
     (zoomOut)="zoomOut()"
     (zoomIn)="zoomIn()"
     (panMode)="panMode = $event"

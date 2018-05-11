@@ -1,7 +1,14 @@
 <div class="container">
     <h4 mat-dialog-title>{{title}}</h4>
-    <div *ngIf="sensorIdent">
-        <line-chart-demo></line-chart-demo>
+    <div *ngIf="plotData">
+        <mat-form-field>
+            <mat-select placeholder="Chart type" (change)="changeChartType($event.value)" [(value)]="chartType">
+                <mat-option *ngFor="let type of chartTypes" [value]="type">
+                {{ type }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <line-chart-demo [data]="plotData" [labels]="plotLabels" [type]="chartType"></line-chart-demo>
     </div>
     <div *ngIf="!sensorIdent">
         No temperature sensor in this room

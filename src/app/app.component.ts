@@ -81,7 +81,7 @@ export class AppComponent implements OnInit {
   }
 
   showSnackBar(message: string) {
-    this.snackBar.open(message, undefined {
+    this.snackBar.open(message, undefined, {
       duration: 2000,
     });
   }
