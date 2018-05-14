@@ -1,6 +1,17 @@
 <div class="container">
     <h4 mat-dialog-title>{{title}}</h4>
-    <div *ngIf="plotData">
+
+    <mat-form-field *ngIf="sensors">
+        <mat-select placeholder="Sensors" (change)="getSensorObservations($event.value)" [(value)]="sensor">
+            <mat-option *ngFor="let sensor of sensors" [value]="sensor">
+            {{ sensor.name }}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+
+    <div *ngIf="plotData.length > 0">
+
+        <!-- Change chart type -->
         <mat-form-field>
             <mat-select placeholder="Chart type" (change)="changeChartType($event.value)" [(value)]="chartType">
                 <mat-option *ngFor="let type of chartTypes" [value]="type">
@@ -8,9 +19,28 @@
                 </mat-option>
             </mat-select>
         </mat-form-field>
+
+        <!-- Change time range -->
+        <ion-range-slider #sliderElement
+            type="double"
+            [values]="dateLabels"
+            [from]="fromIndex"
+            from_shadow="true"
+            [to]="toIndex"
+            to_shadow="true"
+            grid="false"
+            grid_num="10"
+            prefix="Date: "
+            decorate_both="false"
+            (onFinish)="applyRange($event)">
+        </ion-range-slider>
+
         <line-chart-demo [data]="plotData" [labels]="plotLabels" [type]="chartType"></line-chart-demo>
     </div>
-    <div *ngIf="!sensorIdent">
+    <div *ngIf="!sensors">
         No temperature sensor in this room
+    </div>
+    <div *ngIf="plotData.length == 0">
+        No observations available from this sensor
     </div>
 </div>

@@ -25,16 +25,17 @@ export class PlanComponent implements AfterViewInit {
     // Canvas
     private canvasWidth;
     private canvasHeight;
+    private canvasCentroid;
 
     // Scale / offset
     // These factors are calculated from geometry extends
-    private baseScale = 1;
+    private baseScale = 0.9;
     private baseOffsetX = 0;
     private baseOffsetY = 0;
 
     // geometry
     public panMode: boolean = false;
-    private transform = 'translate(0,0) scale(1,1)';
+    private transform = `translate(${this.baseOffsetX},${this.baseOffsetY}) scale(${this.baseScale},${this.baseScale})`;
     private movedX: number = 0; // store move state
     private movedY: number = 0; // store move state
     private scaled: number = 1 // store scale state
@@ -60,6 +61,7 @@ export class PlanComponent implements AfterViewInit {
         const size = element.getBoundingClientRect();
         this.canvasWidth = size.width;
         this.canvasHeight = size.height;
+        this.canvasCentroid = [this.canvasWidth/2, this.canvasHeight/2];        
     }
 
     extractRooms(){
@@ -73,13 +75,13 @@ export class PlanComponent implements AfterViewInit {
                         var x = coordinate[0];
                         var y = -coordinate[1]; // reflect since SVG uses reflected coordinate system
 
-                        // Offset to fit
-                        x = x+this.baseOffsetX;
-                        y = y+this.baseOffsetY;
-
                         // Scale
                         x = x*this.baseScale;
                         y = y*this.baseScale;
+
+                        // Offset to fit
+                        x = x+this.baseOffsetX;
+                        y = y+this.baseOffsetY;
 
                         points+= `${x},${y} `;
                     })
@@ -108,11 +110,10 @@ export class PlanComponent implements AfterViewInit {
         var scale = Math.min(scaleHeight,scaleWidth);
 
         var scaledDataCentroid = [scale*(bb[0]+dataWidth/2), scale*(bb[1]+dataHeight/2)];
-        var canvasCentroid = [this.canvasWidth/2, this.canvasHeight/2];
     
         // Calculate offset factors
-        var offsetX = canvasCentroid[0]-scaledDataCentroid[0];
-        var offsetY = canvasCentroid[1]-scaledDataCentroid[1];
+        var offsetX = this.canvasCentroid[0]-scaledDataCentroid[0];
+        var offsetY = this.canvasCentroid[1]-scaledDataCentroid[1];
 
         // Set global variables
         this.baseOffsetX = offsetX;

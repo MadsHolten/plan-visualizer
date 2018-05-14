@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 
 // Services
 import { ProjectSettingsService } from '../services/project-settings.service';
@@ -23,6 +23,7 @@ export class SettingsComponent implements OnInit {
   loadingMessage: string;
 
   @Input() triples: string;
+  @Output() change = new EventEmitter();
 
   constructor(
     private _pss: ProjectSettingsService
@@ -43,6 +44,7 @@ export class SettingsComponent implements OnInit {
   onDataChange(){
     // Save to localstore
     this._pss.saveTriplestoreSettings(this.projectSettings);
+    this.change.emit();
   }
 
 }

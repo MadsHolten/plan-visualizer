@@ -3,7 +3,7 @@
 <ng-plan height="600" [data]="data" (clickedRoom)="showSpaceDialog($event)"></ng-plan>
 
 <div class="controls">
-    <app-settings></app-settings>
+    <app-settings (change)="getLevels()"></app-settings>
     <mat-form-field *ngIf="levels">
         <mat-select placeholder="Select level" (change)="onLevelChange($event.value)" [(value)]="selectedLevel">
             <mat-option *ngFor="let level of levels" [value]="level.uri">

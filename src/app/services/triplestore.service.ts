@@ -45,7 +45,7 @@ export class TriplestoreService  extends ProjectSettingsService {
       options = {params: params, headers: headers};
     }
 
-    var url = `${this.endpoint}/query`;
+    var url = `${this.endpoint}`;
 
     return this.http.get(url, options);
 

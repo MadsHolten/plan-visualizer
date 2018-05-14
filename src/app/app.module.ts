@@ -9,6 +9,9 @@ import { AuthInterceptor } from './services/auth.interceptor';
 // Local storage
 import { WebStorageModule } from 'ngx-store';
 
+// ION range slider
+import { IonRangeSliderModule } from "ng2-ion-range-slider";
+
 // Angular material
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSelectModule,
@@ -56,6 +59,7 @@ import { LineChartDemoComponent } from './dialogs/charts/chart-x.component';
     WebStorageModule,
     HttpClientModule,
     ChartsModule,
+    IonRangeSliderModule,
     MatSelectModule,
     MatDialogModule,
     MatSnackBarModule,
