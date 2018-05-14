@@ -1,39 +1,62 @@
 <div class="container">
     <h4 mat-dialog-title>{{title}}</h4>
 
-    <mat-form-field *ngIf="sensors">
-        <mat-select placeholder="Sensors" (change)="getSensorObservations($event.value)" [(value)]="sensor">
-            <mat-option *ngFor="let sensor of sensors" [value]="sensor">
-            {{ sensor.name }}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
+    <div fxLayout="row">
+        <div fxLayoutAlign="space-around center" fxFlex="10"></div>
+
+        <div *ngIf="sensors" fxLayoutAlign="space-around center" fxFlex="50">
+            <mat-form-field class="full-width">
+                <mat-select placeholder="Sensors" (change)="getSensorObservations($event.value)" [(value)]="sensor">
+                    <mat-option *ngFor="let sensor of sensors" [value]="sensor">
+                    {{ sensor.name }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div fxLayoutAlign="space-around center" fxFlex="grow"></div>
+
+        <!-- Change chart type -->
+        <div fxLayoutAlign="space-around center" *ngIf="plotData.length > 0" fxFlex="50">
+            <mat-form-field class="full-width">
+                <mat-select placeholder="Chart type" (change)="changeChartType($event.value)" [(value)]="chartType">
+                    <mat-option *ngFor="let type of chartTypes" [value]="type">
+                    {{ type }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div fxLayoutAlign="space-around center" fxFlex="10"></div>
+    </div>
 
     <div *ngIf="plotData.length > 0">
 
-        <!-- Change chart type -->
-        <mat-form-field>
-            <mat-select placeholder="Chart type" (change)="changeChartType($event.value)" [(value)]="chartType">
-                <mat-option *ngFor="let type of chartTypes" [value]="type">
-                {{ type }}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
+        <div fxLayout="row">
 
-        <!-- Change time range -->
-        <ion-range-slider #sliderElement
-            type="double"
-            [values]="dateLabels"
-            [from]="fromIndex"
-            from_shadow="true"
-            [to]="toIndex"
-            to_shadow="true"
-            grid="false"
-            grid_num="10"
-            prefix="Date: "
-            decorate_both="false"
-            (onFinish)="applyRange($event)">
-        </ion-range-slider>
+            <div fxLayoutAlign="space-around center" fxFlex="10"></div>
+
+            <!-- Change time range -->
+            <div fxLayoutAlign="space-around center" fxFlex="grow">
+                <ion-range-slider #sliderElement
+                    class="full-width"
+                    type="double"
+                    [values]="dateLabels"
+                    [from]="fromIndex"
+                    from_shadow="true"
+                    [to]="toIndex"
+                    to_shadow="true"
+                    grid="false"
+                    grid_num="10"
+                    prefix="Date: "
+                    decorate_both="false"
+                    (onFinish)="applyRange($event)">
+                </ion-range-slider>
+            </div>
+
+            <div fxLayoutAlign="space-around center" fxFlex="10"></div>
+
+        </div>
 
         <line-chart-demo [data]="plotData" [labels]="plotLabels" [type]="chartType"></line-chart-demo>
     </div>
@@ -41,6 +64,6 @@
         No temperature sensor in this room
     </div>
     <div *ngIf="plotData.length == 0">
-        No observations available from this sensor
+        No observations available for this sensor
     </div>
 </div>

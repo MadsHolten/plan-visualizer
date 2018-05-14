@@ -12,6 +12,9 @@ import { WebStorageModule } from 'ngx-store';
 // ION range slider
 import { IonRangeSliderModule } from "ng2-ion-range-slider";
 
+// FxFlex
+import { FlexLayoutModule } from '@angular/flex-layout';
+
 // Angular material
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSelectModule,
@@ -58,6 +61,7 @@ import { LineChartDemoComponent } from './dialogs/charts/chart-x.component';
     ReactiveFormsModule,
     WebStorageModule,
     HttpClientModule,
+    FlexLayoutModule,
     ChartsModule,
     IonRangeSliderModule,
     MatSelectModule,

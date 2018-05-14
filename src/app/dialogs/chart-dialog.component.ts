@@ -63,27 +63,23 @@ export class ChartDialogComponent implements OnInit {
     }
 
     getSensorObservations(sensor){
+        this.fromDate = null;
+        this.toDate = null;
         this._ss.getSensorObservations(sensor.uri)
             .subscribe(res => {
                 if(res.length > 0){
                     this.rawData = res;
                     this.processData();
+                }else{
+                    this.plotData = [];
                 }
             });
     }
 
     processData(){
 
-        var raw;
-
         // filter by range if defined
-        if(this.toDate || this.fromDate){
-            raw = this.filterToFrom();
-        }else{
-            raw = this.rawData;
-        }
-
-        console.log(raw);
+        var raw = this.filterToFrom();
 
         var data: Array<any> = raw.map(x => Number(x.value));
         var labels: Array<any> = raw.map(x => x.time);
@@ -95,7 +91,7 @@ export class ChartDialogComponent implements OnInit {
         }
         
         // define labels
-        this.plotLabels = labels;
+        this.plotLabels = labels.map(x => moment(x).format('LLL'));
 
         // override range labels and preselection if not already defined
         if(!this.dateLabels){
@@ -106,6 +102,8 @@ export class ChartDialogComponent implements OnInit {
 
         this.plotData[0] = {data: data, label: this.sensor.name};
 
+        console.log(this.plotData[0]);
+
     }
 
     changeChartType(type){
@@ -113,6 +111,7 @@ export class ChartDialogComponent implements OnInit {
     }
 
     filterToFrom(){
+        if(!this.toDate || !this.fromDate) return this.rawData;
         return this.rawData.filter(obj => {
             if(obj.time > this.toDate) return false;
             if(obj.time < this.fromDate) return false;
@@ -131,6 +130,7 @@ export class ChartDialogComponent implements OnInit {
 
     // Close when clicking outside
     onNoClick(): void {
+        // this.rawData = [];
         this.dialogRef.close();
     }
 
