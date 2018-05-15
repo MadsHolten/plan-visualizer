@@ -53,6 +53,8 @@ export class PlanComponent implements AfterViewInit {
             this.data = changes.data.currentValue;
             this.getScaleOffset();
             this.extractRooms();
+            this.zoomExtends();
+            this.move([0,0]);
         }
     }
 
@@ -76,12 +78,8 @@ export class PlanComponent implements AfterViewInit {
                         var y = -coordinate[1]; // reflect since SVG uses reflected coordinate system
 
                         // Scale
-                        x = x*this.baseScale;
-                        y = y*this.baseScale;
-
-                        // Offset to fit
-                        x = x+this.baseOffsetX;
-                        y = y+this.baseOffsetY;
+                        // x = x*this.baseScale;
+                        // y = y*this.baseScale;
 
                         points+= `${x},${y} `;
                     })
@@ -113,7 +111,7 @@ export class PlanComponent implements AfterViewInit {
     
         // Calculate offset factors
         var offsetX = this.canvasCentroid[0]-scaledDataCentroid[0];
-        var offsetY = this.canvasCentroid[1]-scaledDataCentroid[1];
+        var offsetY = this.canvasCentroid[1]+scaledDataCentroid[1];
 
         // Set global variables
         this.baseOffsetX = offsetX;
@@ -128,8 +126,8 @@ export class PlanComponent implements AfterViewInit {
         var y = displacement[1];
 
         if(!isNaN(x) && !isNaN(y)){
-            x = this.movedX + x;
-            y = this.movedY + y;
+            x = this.baseOffsetX + this.movedX + x;
+            y = this.baseOffsetY + this.movedY + y;
 
             var oldTrns = d3.decompose(this.transform).translate;
             var newTrns = `translate(${x},${y})`;
@@ -143,21 +141,24 @@ export class PlanComponent implements AfterViewInit {
         this.movedY = this.movedY+displacement[1];
     }
 
-    zoom(scale){
+    zoomExtends(){
+        this.scaled = this.baseScale*0.95;
         var oldScale = d3.decompose(this.transform).scale;
-        var newScale = `scale(${scale},${scale})`;
+        var newScale = `scale(${this.scaled},${this.scaled})`;
         this.transform = this.transform.replace(oldScale, newScale);
     }
 
     zoomOut(){
-        this.scaled = this.scaled-0.1;
+        var scaleFactor = this.baseScale/20;
+        this.scaled = this.scaled-scaleFactor;
         var oldScale = d3.decompose(this.transform).scale;
         var newScale = `scale(${this.scaled},${this.scaled})`;
         this.transform = this.transform.replace(oldScale, newScale);
     }
 
     zoomIn(){
-        this.scaled = this.scaled+0.1;
+        var scaleFactor = this.baseScale/20;
+        this.scaled = this.scaled+scaleFactor;
         var oldScale = this.transform.match(/\([^\)]+\)/g)[1];
         var newScale = `(${this.scaled},${this.scaled})`;
         this.transform = this.transform.replace(oldScale, newScale);

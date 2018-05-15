@@ -10,7 +10,8 @@
 .polygon {
     fill:#eee;
     stroke:#777;
-    stroke-width:1
+    stroke-width:1;
+    vector-effect: non-scaling-stroke;
 }
 .room:hover {
     opacity: 0.5;

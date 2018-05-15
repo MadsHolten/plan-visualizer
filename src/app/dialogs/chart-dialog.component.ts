@@ -102,8 +102,6 @@ export class ChartDialogComponent implements OnInit {
 
         this.plotData[0] = {data: data, label: this.sensor.name};
 
-        console.log(this.plotData[0]);
-
     }
 
     changeChartType(type){
@@ -111,7 +109,6 @@ export class ChartDialogComponent implements OnInit {
     }
 
     filterToFrom(){
-        if(!this.toDate || !this.fromDate) return this.rawData;
         return this.rawData.filter(obj => {
             if(obj.time > this.toDate) return false;
             if(obj.time < this.fromDate) return false;
@@ -120,8 +117,12 @@ export class ChartDialogComponent implements OnInit {
     }
 
     applyRange(range){
-        this.fromDate = this.plotLabels[range.from];
-        this.toDate = this.plotLabels[range.to];
+        var from = this.dateLabels[range.from];
+        var to = this.dateLabels[range.to];
+
+        this.fromDate = moment(from).toISOString();
+        this.toDate = moment(to).toISOString();
+
         this.fromIndex = range.from;
         this.toIndex = range.to;
 
