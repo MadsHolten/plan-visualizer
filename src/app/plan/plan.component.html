@@ -1,3 +1,20 @@
+<!-- Toolbar -->
+<div fxLayout="row" class="toolbar">
+    <div fxFlex="grow"></div>
+
+    <div fxLayout="row">
+        <div class="icon-div"  (click)="zoomIn()" matTooltip="Zoom in">
+            <mat-icon>zoom_in</mat-icon>
+        </div>
+        <div class="icon-div" (click)="zoomOut()" matTooltip="Zoom out">
+            <mat-icon>zoom_out</mat-icon>
+        </div>
+        <div class="icon-div" (click)="zoomExtents()" matTooltip="Zoom extents">
+            <mat-icon svgIcon="zoom_extents"></mat-icon>
+        </div>
+    </div>
+</div>
+
 <svg canvasEvents 
     [style.cursor]="panMode ? 'move' : 'default'"
     #canvas
@@ -21,40 +38,5 @@
 
         </polygon>
     </g>
-
-    <!-- Draw canvas centroid -->
-    <!-- <g *ngIf="canvasCentroid">
-        <circle [attr.cx]="canvasCentroid[0]" [attr.cy]="canvasCentroid[1]" [attr.r]="10"></circle>
-    </g> -->
-
-    <!-- Draw offset line -->
-    <!-- <g *ngIf="canvasCentroid && geometryCentroid">
-        <line [attr.x1]="canvasCentroid[0]"
-              [attr.y1]="canvasCentroid[1]"
-              [attr.x2]="geometryCentroid[0]"
-              [attr.y2]="geometryCentroid[1]"
-              style="stroke:rgb(255,0,0);stroke-width:2">
-        </line>
-    </g> -->
-
-    <!-- Draw offset X line -->
-    <!-- <g *ngIf="canvasCentroid && geometryCentroid">
-            <line [attr.x1]="canvasCentroid[0]"
-                    [attr.y1]="canvasCentroid[1]"
-                    [attr.x2]="geometryCentroid[0]+offsetX"
-                    [attr.y2]="geometryCentroid[1]"
-                    style="stroke:green;stroke-width:2">
-            </line>
-    </g> -->
-
-    <!-- Draw offset Y line -->
-    <!-- <g *ngIf="canvasCentroid && geometryCentroid">
-            <line [attr.x1]="canvasCentroid[0]"
-                    [attr.y1]="canvasCentroid[1]"
-                    [attr.x2]="geometryCentroid[0]"
-                    [attr.y2]="geometryCentroid[1]+offsetY"
-                    style="stroke:blue;stroke-width:2">
-            </line>
-    </g> -->
 
 </svg>

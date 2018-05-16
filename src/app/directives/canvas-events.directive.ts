@@ -31,10 +31,10 @@ export class CanvasEventsDirective {
   @HostListener('document:keydown', ['$event'])
   onKeyDown(ev:KeyboardEvent){
       if(ev.key == "ArrowDown"){
-        this.zoomOut.emit(ev);
+        this.zoomIn.emit(ev);
       }
       if(ev.key == "ArrowUp"){
-        this.zoomIn.emit(ev);
+        this.zoomOut.emit(ev);
       }
       if(ev.key == "Alt"){
         // enable drag mode if holding Alt

@@ -53,7 +53,7 @@ export class PlanComponent implements AfterViewInit {
             this.data = changes.data.currentValue;
             this.getScaleOffset();
             this.extractRooms();
-            this.zoomExtends();
+            this.zoomExtents();
             this.move([0,0]);
         }
     }
@@ -140,11 +140,11 @@ export class PlanComponent implements AfterViewInit {
     onWindowResize(){
         this.getCanvasSize();
         this.getScaleOffset();
-        this.zoomExtends();
+        this.zoomExtents();
         this.move([0,0]);
     }
 
-    zoomExtends(){
+    zoomExtents(){
         this.scaled = this.baseScale*0.95;
         var oldScale = d3.decompose(this.transform).scale;
         var newScale = `scale(${this.scaled},${this.scaled})`;
