@@ -77,10 +77,6 @@ export class PlanComponent implements AfterViewInit {
                         var x = coordinate[0];
                         var y = -coordinate[1]; // reflect since SVG uses reflected coordinate system
 
-                        // Scale
-                        // x = x*this.baseScale;
-                        // y = y*this.baseScale;
-
                         points+= `${x},${y} `;
                     })
                     points = points.trim();    // remove last space
@@ -141,11 +137,22 @@ export class PlanComponent implements AfterViewInit {
         this.movedY = this.movedY+displacement[1];
     }
 
+    onWindowResize(){
+        this.getCanvasSize();
+        this.getScaleOffset();
+        this.zoomExtends();
+        this.move([0,0]);
+    }
+
     zoomExtends(){
         this.scaled = this.baseScale*0.95;
         var oldScale = d3.decompose(this.transform).scale;
         var newScale = `scale(${this.scaled},${this.scaled})`;
         this.transform = this.transform.replace(oldScale, newScale);
+    }
+
+    center(){
+
     }
 
     zoomOut(){

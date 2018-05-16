@@ -7,6 +7,7 @@
     (panMode)="panMode = $event"
     (move)="move($event)"
     (moveEnd)="moveEnd($event)"
+    (window:resize)="onWindowResize()"
     id="canvas">
 
     <!--Draw rooms-->
