@@ -1,16 +1,37 @@
 <!--The content below is only a placeholder and can be replaced.-->
 <!-- <plan-drawing height="600" [data]="data"></plan-drawing> -->
-<ng-plan height="600" [data]="data" [colors]="colors" (clickedRoom)="showSpaceDialog($event)"></ng-plan>
+<ng-plan 
+    height="600" 
+    [data]="data" 
+    [colors]="colors"
+    [centroids]="false"
+    (clickedRoom)="showSpaceDialog($event)">
+</ng-plan>
 
 <div class="controls">
     <app-settings (change)="getLevels()"></app-settings>
-    <mat-form-field *ngIf="levels">
-        <mat-select placeholder="Select level" (change)="onLevelChange($event.value)" [(value)]="selectedLevel">
-            <mat-option *ngFor="let level of levels" [value]="level.uri">
-            {{ level.name }}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
+
+    <div fxLayout="column">
+
+        <!-- Select level -->
+        <mat-form-field *ngIf="levels">
+            <mat-select placeholder="Select level" (change)="onLevelChange($event.value)" [(value)]="selectedLevel">
+                <mat-option *ngFor="let level of levels" [value]="level.uri">
+                {{ level.name }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <!-- Color by -->
+        <mat-form-field *ngIf="levels">
+            <mat-select placeholder="Color by" value="0">
+                <mat-option value="0">
+                Max temperature
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+    </div>
 </div>
 <mat-card class="query-container" *ngIf="showQuery">
     <div class="icon-bar">

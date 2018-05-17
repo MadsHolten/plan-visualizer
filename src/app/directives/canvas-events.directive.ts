@@ -9,6 +9,7 @@ export class CanvasEventsDirective {
   @Output() move = new EventEmitter();
   @Output() moveEnd = new EventEmitter();
   @Output() panMode = new EventEmitter();
+  @Output() addNodeMode = new EventEmitter();
 
   private mouseDown: boolean = false;
   private dragMode: boolean = false;
@@ -41,6 +42,9 @@ export class CanvasEventsDirective {
         this.dragMode = true;
         this.panMode.emit(true);
       }
+      if(ev.key == "Control"){
+        this.addNodeMode.emit(true);
+      }
   }
 
   @HostListener('document:keyup', ['$event'])
@@ -49,6 +53,9 @@ export class CanvasEventsDirective {
         // disable drag mode if releasing Alt
         this.dragMode = false;
         this.panMode.emit(false);
+      }
+      if(ev.key == "Control"){
+        this.addNodeMode.emit(false);
       }
       
   }

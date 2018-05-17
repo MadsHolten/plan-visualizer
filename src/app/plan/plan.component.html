@@ -15,6 +15,11 @@
     </div>
 </div>
 
+<div class="footer">
+    <p>Press and hold "Alt" to pan</p>
+    <p>Press and hold "Ctrl" while clicking space to log coordinates to console</p>
+</div>
+
 <svg canvasEvents 
     [style.cursor]="panMode ? 'move' : 'default'"
     #canvas
@@ -25,6 +30,7 @@
     (move)="move($event)"
     (moveEnd)="moveEnd($event)"
     (window:resize)="onWindowResize()"
+    (addNodeMode)="addNodeMode = $event"
     id="canvas">
 
     <!--Draw rooms-->
@@ -32,7 +38,7 @@
         [attr.transform]="transform"
         [id]="room.uri"
         [matTooltip]="room.name"
-        (click)="selectRoom(room)"
+        (click)="addNodeMode ? addNode($event, room) : selectRoom(room)"
         [attr.fill]="room.color ? room.color : '#eee'"
         class="room">
 
@@ -43,8 +49,39 @@
         </polygon>
 
         <!-- Draw centroids -->
-        <circle [attr.cx]="room.centroid[0]" fill="black" [attr.cy]="room.centroid[1]" [attr.r]="scaled*500">
+        <circle 
+            *ngIf="centroids" 
+            [attr.cx]="room.centroid[0]" 
+            [matTooltip]="room.centroid" 
+            fill="black" 
+            [attr.cy]="room.centroid[1]" 
+            [attr.r]="scaled*500">
         </circle>
+
+        <!-- Add labels -->
+        <text 
+            [style.font-size.em]="'12'"
+            style = "font-family:roboto; fill: black;"
+            text-anchor="middle" 
+            alignment-baseline="central"
+            [attr.x]="room.centroid[0]"
+            [attr.dy]="room.description ? -150 : 0"
+            [attr.y]="room.centroid[1]">
+            {{room.name}}
+        </text>
+
+        <!-- Add description -->
+        <text 
+            *ngIf = "room.description"
+            [style.font-size.em]="'10'"
+            style = "font-family:roboto; fill: black;"
+            text-anchor="middle" 
+            alignment-baseline="central"
+            [attr.x]="room.centroid[0]"
+            [attr.y]="room.centroid[1]"
+            dy="150">
+            {{room.description}}
+        </text>
     </g>
 
 </svg>

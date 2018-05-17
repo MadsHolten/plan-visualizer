@@ -28,7 +28,7 @@
 }
 .icon-div > .mat-icon{
     user-select: none;
-    background-color: rgba(144, 238, 248, 0.3);
+    background-color: rgba(220, 220, 220, 0.3);
     border-width: 1px;
     border-radius: 5px;
     margin-left: 5px;
@@ -46,4 +46,14 @@
     cursor: pointer;
     color: rgba(0,0,0,1);
     z-index: 10;
+}
+.footer{
+    background-color: rgba(220, 220, 220, 0.3);
+    position: absolute;
+    bottom: 0px;
+    font-family: consolas;
+    font-size: 12px;
+    padding: 0px 10px 0px 10px;
+    border-radius: 5px;
+    bottom: 10px;
 }

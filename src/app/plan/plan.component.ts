@@ -20,6 +20,7 @@ export class PlanComponent implements AfterViewInit {
 
     @Input() private data;  //geoJSON
     @Input() private colors;  //color schema
+    @Input() private centroids: boolean;  //color schema
     public rooms;
 
     private selectedRoom;
@@ -36,11 +37,14 @@ export class PlanComponent implements AfterViewInit {
     private baseOffsetY = 0;
 
     // geometry
-    public panMode: boolean = false;
     private transform = `translate(${this.baseOffsetX},${this.baseOffsetY}) scale(${this.baseScale},${this.baseScale})`;
     private movedX: number = 0; // store move state
     private movedY: number = 0; // store move state
     private scaled: number = 1 // store scale state
+
+    // modes
+    public panMode: boolean = false;
+    public addNodeMode: boolean = false;
 
     @ViewChild('canvas') private planContainer: ElementRef;
 
@@ -53,8 +57,8 @@ export class PlanComponent implements AfterViewInit {
     ngOnChanges(changes: SimpleChanges) {
         if (changes.data && changes.data.currentValue) {
             this.data = changes.data.currentValue;
-            this.getScaleOffset();
             this.extractRooms();
+            this.getScaleOffset();
             this.zoomExtents();
             this.move([0,0]);
         }
@@ -63,11 +67,29 @@ export class PlanComponent implements AfterViewInit {
         }
     }
 
+    addNode(ev, room){
+
+        var scale = this.scaled;
+        var offsetX = this.baseOffsetX+this.movedX;
+        var offsetY = this.baseOffsetY+this.movedY;
+        var screenX = ev.offsetX;
+        var screenY = ev.offsetX;
+
+        var x = (screenX-offsetX)/scale;
+        var y = (screenY-offsetY)/scale;
+        var coordinates = [x,-y];
+
+        console.log('Coordinates: '+coordinates);
+        console.log('Room: '+room.uri);
+    }
+
     defineColors(){
+        console.log(this.colors)
         this.rooms.map(x => {
             var match = this.colors.filter(y => y.uri == x.uri);
             if(match.length > 0){
                 x.color = match[0].color;
+                x.description = match[0].value;
             }
             return x;
         });
@@ -109,7 +131,8 @@ export class PlanComponent implements AfterViewInit {
             var name = room.properties.name;
             var uri = room.properties.uri;
             var color = room.properties.color;
-            return {name: name, uri: uri, color: color, polygons: polygons, centroid: centroid}
+            var description = '';
+            return {name: name, uri: uri, description: description, color: color, polygons: polygons, centroid: centroid}
         });
     }
 
@@ -130,7 +153,7 @@ export class PlanComponent implements AfterViewInit {
     
         // Calculate offset factors
         var offsetX = this.canvasCentroid[0]-scaledDataCentroid[0];
-        var offsetY = this.canvasCentroid[1]+scaledDataCentroid[1];
+        var offsetY = this.canvasCentroid[1]-scaledDataCentroid[1];
 
         // Set global variables
         this.baseOffsetX = offsetX;
@@ -172,10 +195,6 @@ export class PlanComponent implements AfterViewInit {
         var oldScale = d3.decompose(this.transform).scale;
         var newScale = `scale(${this.scaled},${this.scaled})`;
         this.transform = this.transform.replace(oldScale, newScale);
-    }
-
-    center(){
-
     }
 
     zoomOut(){
