@@ -10,8 +10,7 @@
     z-index: -1;
 }
 .polygon {
-    fill:#eee;
-    stroke:#777;
+    stroke:#000;
     stroke-width:1;
     vector-effect: non-scaling-stroke;
 }

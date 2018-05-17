@@ -1,6 +1,6 @@
 <!--The content below is only a placeholder and can be replaced.-->
 <!-- <plan-drawing height="600" [data]="data"></plan-drawing> -->
-<ng-plan height="600" [data]="data" (clickedRoom)="showSpaceDialog($event)"></ng-plan>
+<ng-plan height="600" [data]="data" [colors]="colors" (clickedRoom)="showSpaceDialog($event)"></ng-plan>
 
 <div class="controls">
     <app-settings (change)="getLevels()"></app-settings>

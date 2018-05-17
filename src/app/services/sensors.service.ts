@@ -78,6 +78,40 @@ export class SensorsService  extends TriplestoreService {
 
     }
 
+    public getRoomMaxTemperaturesAtStorey(storeyURI){
+
+        // MAX(), MIN(), AVG()
+        const q = `
+        PREFIX bot: 	<https://w3id.org/bot#>
+        PREFIX seas: 	<https://w3id.org/seas/>
+        PREFIX dcterms: <http://purl.org/dc/terms/>
+        PREFIX dog: 	<http://elite.polito.it/ontologies/dogont.owl#>
+        PREFIX skos: 	<http://www.w3.org/2004/02/skos/core#>
+        PREFIX sosa:	<http://www.w3.org/ns/sosa/>
+        PREFIX om:	    <http://www.ontology-of-units-of-measure.org/resource/om-2/>
+         
+        SELECT ?uri (MAX(?val) AS ?value)
+        WHERE{
+          # Get sensor
+          <${storeyURI}> bot:hasSpace ?uri .
+          ?space skos:related ?uri ;
+            bot:containsElement ?tempSensor .
+          ?tempSensor a dog:TemperatureSensor .
+
+          # Observation
+          ?obs sosa:madeBySensor | sosa:actuationMadeBy ?tempSensor ;
+            sosa:hasResult/om:hasNumericalValue ?val ;
+            sosa:resultTime ?time .
+        } GROUP BY ?uri`;
+
+        return this.getQuery(q)
+            .map(res => {
+                let x: any = res;
+                return x.results.bindings;
+            });
+
+    }
+
     public getTemperatureObservations(spaceURI){
 
         const q = `

@@ -28,6 +28,8 @@
     "core-js": "^2.4.1",
     "d3": "^4.13.0",
     "d3-decompose": "^1.0.2",
+    "d3-polygon": "^1.0.3",
+    "d3-scale": "^2.0.0",
     "geojson-extent": "^0.3.2",
     "hammerjs": "^2.0.8",
     "jquery": "^3.3.1",

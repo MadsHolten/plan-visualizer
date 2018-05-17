@@ -33,10 +33,18 @@
         [id]="room.uri"
         [matTooltip]="room.name"
         (click)="selectRoom(room)"
+        [attr.fill]="room.color ? room.color : '#eee'"
         class="room">
-        <polygon *ngFor="let polygon of room.polygons" [attr.points]="polygon" class="polygon">
 
+        <!-- Draw polygons -->
+        <polygon *ngFor="let polygon of room.polygons" 
+            [attr.points]="polygon" 
+            class="polygon">
         </polygon>
+
+        <!-- Draw centroids -->
+        <circle [attr.cx]="room.centroid[0]" fill="black" [attr.cy]="room.centroid[1]" [attr.r]="scaled*500">
+        </circle>
     </g>
 
 </svg>

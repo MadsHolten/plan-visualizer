@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, AfterViewInit, OnChanges, Simpl
 
 import * as geojsonExtent from 'geojson-extent';
 import * as d3 from 'd3-decompose';  // takes SVG or CSS3 transform strings and converts them into usable values
+import * as d3p from 'd3-polygon';   // Operations on polygons
 
 export interface Room {
     name: string;
@@ -18,6 +19,7 @@ export class PlanComponent implements AfterViewInit {
     @Output() clickedRoom = new EventEmitter();
 
     @Input() private data;  //geoJSON
+    @Input() private colors;  //color schema
     public rooms;
 
     private selectedRoom;
@@ -49,13 +51,26 @@ export class PlanComponent implements AfterViewInit {
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.data.currentValue) {
+        if (changes.data && changes.data.currentValue) {
             this.data = changes.data.currentValue;
             this.getScaleOffset();
             this.extractRooms();
             this.zoomExtents();
             this.move([0,0]);
         }
+        if (changes.colors && changes.colors.currentValue){
+            this.defineColors();
+        }
+    }
+
+    defineColors(){
+        this.rooms.map(x => {
+            var match = this.colors.filter(y => y.uri == x.uri);
+            if(match.length > 0){
+                x.color = match[0].color;
+            }
+            return x;
+        });
     }
 
     getCanvasSize(){
@@ -69,25 +84,33 @@ export class PlanComponent implements AfterViewInit {
     extractRooms(){
         this.rooms = this.data.features.map(room => {
             var polygons = [];
-
+            var centroid;
             if(room.geometry.type == "Polygon"){
                 room.geometry.coordinates.forEach(polygon => {
+
                     var points = '';
-                    polygon.forEach(coordinate => {
+                    // Reflect y coordinates to fit browser coordinate system and extract to polygon
+                    polygon.map(coordinate => {
                         var x = coordinate[0];
                         var y = -coordinate[1]; // reflect since SVG uses reflected coordinate system
 
                         points+= `${x},${y} `;
+                        coordinate[1] = y; // Update polygon with new y
+                        return coordinate;
                     })
                     points = points.trim();    // remove last space
+
+                    // Get polygon centroid
+                    centroid = d3p.polygonCentroid(polygon);
+
                     polygons.push(points);
                 });
             }
             var name = room.properties.name;
             var uri = room.properties.uri;
-            return {name: name, uri: uri, polygons: polygons}
+            var color = room.properties.color;
+            return {name: name, uri: uri, color: color, polygons: polygons, centroid: centroid}
         });
-
     }
 
     getScaleOffset() {

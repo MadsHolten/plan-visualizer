@@ -44,7 +44,7 @@ export class RoomsService  extends TriplestoreService {
 
     }
 
-    public getBoundariesByLevel(uri){
+    public getBoundariesByLevel(storeyURI){
 
         const q = `
         PREFIX bot:     <https://w3id.org/bot#>
@@ -55,7 +55,7 @@ export class RoomsService  extends TriplestoreService {
         PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
         SELECT DISTINCT ?uri ?name ?geometry2d
         WHERE {
-            <${uri}> bot:hasSpace ?uri .
+            <${storeyURI}> bot:hasSpace ?uri .
             ?uri props:identityDataName/seas:evaluation [
                     a opm:CurrentState ;
                     schema:value ?name
