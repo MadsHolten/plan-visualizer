@@ -37,16 +37,21 @@
     <g *ngFor="let room of rooms"
         [attr.transform]="transform"
         [id]="room.uri"
-        [matTooltip]="room.name"
         (click)="addNodeMode ? addNode($event, room) : selectRoom(room)"
         [attr.fill]="room.color ? room.color : '#eee'"
         class="room">
 
         <!-- Draw polygons -->
-        <polygon *ngFor="let polygon of room.polygons" 
+        <!-- <polygon *ngFor="let polygon of room.polygons" 
             [attr.points]="polygon" 
             class="polygon">
-        </polygon>
+        </polygon> -->
+
+        <!-- Draw paths -->
+        <path
+            [attr.d]="room.path"
+            class="polygon">
+        </path> 
 
         <!-- Draw centroids -->
         <circle 

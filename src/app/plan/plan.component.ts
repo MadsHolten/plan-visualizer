@@ -84,7 +84,6 @@ export class PlanComponent implements AfterViewInit {
     }
 
     defineColors(){
-        console.log(this.colors)
         this.rooms.map(x => {
             var match = this.colors.filter(y => y.uri == x.uri);
             if(match.length > 0){
@@ -106,33 +105,45 @@ export class PlanComponent implements AfterViewInit {
     extractRooms(){
         this.rooms = this.data.features.map(room => {
             var polygons = [];
+            var roomPath = '';
             var centroid;
-            if(room.geometry.type == "Polygon"){
+            if(room.geometry && room.geometry.type == "Polygon"){
+                
+                var roomPolygons = [];  // Allow multi polygons if doughnut room
                 room.geometry.coordinates.forEach(polygon => {
 
                     var points = '';
+                    var path = '';
                     // Reflect y coordinates to fit browser coordinate system and extract to polygon
-                    polygon.map(coordinate => {
+                    polygon.map((coordinate,index) => {
                         var x = coordinate[0];
                         var y = -coordinate[1]; // reflect since SVG uses reflected coordinate system
 
                         points+= `${x},${y} `;
+                        path+= (index == 0) ? `M${x},${y} ` : `L${x},${y} `;
+
                         coordinate[1] = y; // Update polygon with new y
                         return coordinate;
                     })
                     points = points.trim();    // remove last space
+                    path = path.trim();         // remove last space
 
-                    // Get polygon centroid
-                    centroid = d3p.polygonCentroid(polygon);
+                    // Get polygon centroid from first polygon
+                    if(roomPolygons.length < 1){
+                        centroid = d3p.polygonCentroid(polygon);
+                    }
 
-                    polygons.push(points);
+                    roomPolygons.push(points);
+                    roomPath+=path;
                 });
+                polygons.push(roomPolygons);
             }
             var name = room.properties.name;
             var uri = room.properties.uri;
             var color = room.properties.color;
             var description = '';
-            return {name: name, uri: uri, description: description, color: color, polygons: polygons, centroid: centroid}
+
+            return {name: name, uri: uri, description: description, color: color, polygons: polygons, path:roomPath, centroid: centroid}
         });
     }
 
@@ -150,7 +161,7 @@ export class PlanComponent implements AfterViewInit {
         var scale = Math.min(scaleHeight,scaleWidth);
 
         var scaledDataCentroid = [scale*(bb[0]+dataWidth/2), scale*(bb[1]+dataHeight/2)];
-    
+
         // Calculate offset factors
         var offsetX = this.canvasCentroid[0]-scaledDataCentroid[0];
         var offsetY = this.canvasCentroid[1]-scaledDataCentroid[1];

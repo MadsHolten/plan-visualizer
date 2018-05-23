@@ -86,9 +86,9 @@ export class AppComponent implements OnInit {
     // Get max temperatures
     this._ss.getRoomMaxTemperaturesAtStorey(this.selectedLevel)
           .subscribe(res => {
-            if(res){
+            if(res && res[0].value){
               var range = res.map(x => Number(x.value.value));
-              var color_scale = d3.scaleLinear().domain([15, 30]).range(['#fee8c8', '#e34a33']);
+              var color_scale = d3.scaleLinear().domain([25, 30]).range(['#fee8c8', '#e34a33']);
               this.colors = res.map(x => {
                 var uri = x.uri.value;
                 var value = x.value.value;

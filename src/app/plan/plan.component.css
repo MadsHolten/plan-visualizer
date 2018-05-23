@@ -13,6 +13,7 @@
     stroke:#000;
     stroke-width:1;
     vector-effect: non-scaling-stroke;
+    fill-rule: evenodd;
 }
 .room:hover {
     opacity: 0.5;
