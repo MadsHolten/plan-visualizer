@@ -24,8 +24,8 @@
     [style.cursor]="panMode ? 'move' : 'default'"
     #canvas
     class=canvas
-    (zoomOut)="zoomOut()"
-    (zoomIn)="zoomIn()"
+    (zoomOut)="zoomOut($event)"
+    (zoomIn)="zoomIn($event)"
     (panMode)="panMode = $event"
     (move)="move($event)"
     (moveEnd)="moveEnd($event)"

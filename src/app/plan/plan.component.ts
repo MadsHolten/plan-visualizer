@@ -60,7 +60,6 @@ export class PlanComponent implements AfterViewInit {
             this.extractRooms();
             this.getScaleOffset();
             this.zoomExtents();
-            this.move([0,0]);
         }
         if (changes.colors && changes.colors.currentValue){
             this.defineColors();
@@ -175,16 +174,8 @@ export class PlanComponent implements AfterViewInit {
     }
 
     move(displacement){
-        var x = displacement[0];
-        var y = displacement[1];
-
-        if(!isNaN(x) && !isNaN(y)){
-            x = this.baseOffsetX + this.movedX + x;
-            y = this.baseOffsetY + this.movedY + y;
-
-            var oldTrns = d3.decompose(this.transform).translate;
-            var newTrns = `translate(${x},${y})`;
-            this.transform = this.transform.replace(oldTrns, newTrns);
+        if(displacement){
+            this.zoomHandler(undefined,displacement);
         }
     }
 
@@ -198,30 +189,61 @@ export class PlanComponent implements AfterViewInit {
         this.getCanvasSize();
         this.getScaleOffset();
         this.zoomExtents();
-        this.move([0,0]);
     }
 
     zoomExtents(){
         this.scaled = this.baseScale*0.95;
-        var oldScale = d3.decompose(this.transform).scale;
-        var newScale = `scale(${this.scaled},${this.scaled})`;
-        this.transform = this.transform.replace(oldScale, newScale);
+        this.movedX = 0;
+        this.movedY = 0;
+        this.zoomHandler();
     }
 
-    zoomOut(){
-        var scaleFactor = this.baseScale/20;
+    zoomOut(ev){
+        // Calculate current scale
+        var scaleFactor = this.baseScale/5;
         this.scaled = this.scaled-scaleFactor;
-        var oldScale = d3.decompose(this.transform).scale;
-        var newScale = `scale(${this.scaled},${this.scaled})`;
-        this.transform = this.transform.replace(oldScale, newScale);
+        this.zoomHandler(ev);
     }
 
-    zoomIn(){
-        var scaleFactor = this.baseScale/20;
+    zoomIn(ev){
+        var scaleFactor = this.baseScale/5;
         this.scaled = this.scaled+scaleFactor;
-        var oldScale = this.transform.match(/\([^\)]+\)/g)[1];
-        var newScale = `(${this.scaled},${this.scaled})`;
-        this.transform = this.transform.replace(oldScale, newScale);
+        this.zoomHandler(ev);
+    }
+
+    zoomHandler(ev?,displacement?){
+
+        var trns1 = '';
+
+        if(displacement){
+            var dx = this.baseOffsetX + this.movedX + displacement[0];
+            var dy = this.baseOffsetY + this.movedY + displacement[1];
+        }else{
+            dx = this.baseOffsetX + this.movedX;
+            dy = this.baseOffsetY + this.movedY;
+        }
+
+        // This should be adjusted to center at mouse position while zooming
+
+        // if(ev && ev.offsetX){
+        //     // Get mouse position relative to canvas center point and move
+        //     var mx = ev.offsetX-this.canvasCentroid[0];
+        //     var my = ev.offsetY-this.canvasCentroid[1];
+        //     var dx2 = mx;
+        //     var dy2 = my;
+        //     trns1 = `translate(${dx2},${dy2})`;
+        //     console.log(trns1)
+        // }
+
+        var oldScale = d3.decompose(this.transform).scale;
+        var oldTrns = d3.decompose(this.transform).translate;
+        var scale = `scale(${this.scaled},${this.scaled})`;
+
+        var trns = `translate(${dx},${dy})`;
+
+        // Update transform attribute
+        this.transform = trns+trns1+scale;
+        // this.transform = this.transform.replace(oldScale,scale);
     }
 
     selectRoom(ev){
