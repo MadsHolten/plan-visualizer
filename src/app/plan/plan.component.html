@@ -20,10 +20,11 @@
     <p>Press and hold "Ctrl" while clicking space to log coordinates to console</p>
 </div>
 
-<svg canvasEvents 
+<svg canvasEvents
     [style.cursor]="panMode ? 'move' : 'default'"
     #canvas
     class=canvas
+    (click)="onCanvasClick($event)"
     (zoomOut)="zoomOut($event)"
     (zoomIn)="zoomIn($event)"
     (panMode)="panMode = $event"
@@ -49,6 +50,7 @@
 
         <!-- Draw paths -->
         <path
+            [class.selected-space]="selectedRoom ? room.uri == selectedRoom.uri : false"
             [attr.d]="room.path"
             class="polygon">
         </path> 

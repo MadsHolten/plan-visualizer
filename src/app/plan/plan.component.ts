@@ -251,4 +251,9 @@ export class PlanComponent implements AfterViewInit {
         this.selectedRoom = ev;
     }
 
+    onCanvasClick(ev){
+        if(ev.target.id != 'canvas') return;
+        this.selectedRoom = null;
+    }
+
 }

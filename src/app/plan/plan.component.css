@@ -22,6 +22,9 @@
 .selected {
     fill:red;
 }
+.selected-space{
+    stroke-width: 2;
+}
 .toolbar {
     position: absolute;
     right: 20px;
